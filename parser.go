@@ -56,7 +56,7 @@ func ParseRulesFromReader(r io.Reader) (rules, exceptions []Rule, err error) {
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return nil, nil, fmt.Errorf("unable to read proxy rules: %w", err)
+		return nil, nil, fmt.Errorf("unable to read proxy rules: %s", err)
 	}
 	return
 }
