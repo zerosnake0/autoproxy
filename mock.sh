@@ -1,0 +1,1 @@
+mockgen -source rule.go -destination=mock/rule.go -package=mock Rule
