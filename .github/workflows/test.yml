@@ -26,6 +26,9 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
 
+      - name: Mod
+        run: go mod download
+
       - name: Mock
         run: sh mock.sh
 
