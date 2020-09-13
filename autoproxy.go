@@ -62,8 +62,8 @@ func (p *AutoProxy) sort() {
 		defer p.mu.Unlock()
 		elapsed := time.Now().Sub(p.lastSort)
 		if elapsed > p.sortPeriod {
-			sort.Reverse(p.rules)
-			sort.Reverse(p.exceptions)
+			sort.Sort(p.rules)
+			sort.Sort(p.exceptions)
 		}
 	}()
 }
@@ -77,13 +77,13 @@ func (p *AutoProxy) Match(u *url.URL) bool {
 			p.sort()
 		}
 	}
-	for _, rule := range p.exceptions {
-		if rule.Match(u) {
+	for i := range p.exceptions {
+		if p.exceptions[i].Match(u) {
 			return false
 		}
 	}
-	for _, rule := range p.rules {
-		if rule.Match(u) {
+	for i := range p.rules {
+		if p.rules[i].Match(u) {
 			return true
 		}
 	}

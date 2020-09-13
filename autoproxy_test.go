@@ -73,13 +73,16 @@ func TestAutoProxy_Match(t *testing.T) {
 	})
 	t.Run("sort", func(t *testing.T) {
 		must := require.New(t)
+		period := time.Second
 		p := New(&Option{
-			SortPeriod: time.Second,
+			SortPeriod: period,
 		})
 		err := p.Read(strings.NewReader(`
 		example.com
 		example2.com`))
 		must.NoError(err)
+		require.Equal(t, 2, len(p.rules))
+
 		var eg errgroup.Group
 		for i, _raw := range []string{
 			"http://example.com",
@@ -101,5 +104,24 @@ func TestAutoProxy_Match(t *testing.T) {
 		}
 		err = eg.Wait()
 		must.NoError(err)
+
+		<-p.ch
+		p.lastSort = time.Now().Add(-2 * period)
+		p.readyToSort()
+
+		ok, err := MatchRule(p, "http://example3.com")
+		must.NoError(err)
+		must.False(ok)
+
+		<-p.ch
+
+		require.Equal(t, sortedRule{
+			rule:   keywordRule{"example2.com"},
+			weight: 2,
+		}, p.rules[0])
+		require.Equal(t, sortedRule{
+			rule:   keywordRule{"example.com"},
+			weight: 1,
+		}, p.rules[1])
 	})
 }

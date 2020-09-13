@@ -7,7 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/zerosnake0/autoproxy/mock"
+	"github.com/zerosnake0/autoproxy/internal/mock"
 )
 
 func testRuleSet(t *testing.T, rule Rule, matches, nonMatches []string) {

@@ -31,7 +31,7 @@ func (rules sortedRules) Len() int {
 }
 
 func (rules sortedRules) Less(i, j int) bool {
-	return rules[i].weight < rules[j].weight
+	return rules[i].weight > rules[j].weight
 }
 
 func (rules sortedRules) Swap(i, j int) {
