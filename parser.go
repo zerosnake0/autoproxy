@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"regexp"
 )
 
 func ParseRule(rule string) (Rule, error) {
@@ -14,12 +15,12 @@ func ParseRule(rule string) (Rule, error) {
 	}
 	if rule[0] == '|' {
 		if len(rule) == 1 {
-			return nil, errors.New("bad rule")
+			return nil, fmt.Errorf("bad rule %q", rule)
 		}
 		if rule[1] == '|' {
 			subRule := rule[2:]
 			if subRule == "" {
-				return nil, errors.New("empty domain rule")
+				return nil, fmt.Errorf("empty domain rule %q", rule)
 			}
 			// ||example.com
 			return domainRule{subRule}, nil
@@ -28,6 +29,20 @@ func ParseRule(rule string) (Rule, error) {
 			// |https://example.com
 			return prefixRule{rule[1:]}, nil
 		}
+	}
+	if rule[0] == '/' {
+		if len(rule) <= 2 {
+			return nil, fmt.Errorf("bad regex rule %q", rule)
+		}
+		if rule[len(rule)-1] != '/' {
+			return nil, fmt.Errorf("bad regex rule %q", rule)
+		}
+		subRule := rule[1 : len(rule)-1]
+		reg, err := regexp.Compile(subRule)
+		if err != nil {
+			return nil, fmt.Errorf("bad regex rule %q: %s", rule, err)
+		}
+		return regexRule{reg}, nil
 	}
 	return keywordRule{rule}, nil
 }

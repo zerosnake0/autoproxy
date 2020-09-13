@@ -3,6 +3,7 @@ package autoproxy
 import (
 	"errors"
 	"io"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -40,6 +41,31 @@ func TestParseRule(t *testing.T) {
 		r, err := ParseRule(kw)
 		require.NoError(t, err)
 		require.Equal(t, keywordRule{kw}, r)
+	})
+	t.Run("regex", func(t *testing.T) {
+		t.Run("bad", func(t *testing.T) {
+			r, err := ParseRule("//")
+			require.Error(t, err)
+			require.Nil(t, r)
+		})
+		t.Run("bad", func(t *testing.T) {
+			r, err := ParseRule("/^a")
+			require.Error(t, err)
+			require.Nil(t, r)
+		})
+		t.Run("bad", func(t *testing.T) {
+			r, err := ParseRule("/[^]/")
+			require.Error(t, err)
+			require.Nil(t, r)
+		})
+		t.Run("good", func(t *testing.T) {
+			raw := "^abc$"
+			r, err := ParseRule("/" + raw + "/")
+			require.NoError(t, err)
+			reg, err := regexp.Compile(raw)
+			require.NoError(t, err)
+			require.Equal(t, regexRule{reg}, r)
+		})
 	})
 }
 
